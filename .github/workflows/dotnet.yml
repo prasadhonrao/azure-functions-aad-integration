@@ -1,7 +1,4 @@
-# This workflow will build a .NET project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
-
-name: .NET
+name: Deploy to Azure Function App
 
 on:
   push:
@@ -12,18 +9,34 @@ on:
 env:
   DOTNET_VERSION: 6.0.x
   PROJECT_PATH: App/App.csproj
+  AZURE_FUNCTIONAPP_NAME: af-aad-func
+  AZURE_RESOURCE_GROUP: af-aad-rg
+  AZURE_LOCATION: uksouth
 
 jobs:
   BuildLinux:
     runs-on: ubuntu-latest
     steps:
+      # Checkout the repo
     - name: Checkout Code
       uses: actions/checkout@v3
+
+      # Setup .NET Core SDK
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
+      
+      # Install dependencies
     - name: Restore dependencies
       run: dotnet restore ${{env.PROJECT_PATH}}
+    
+      # Build
     - name: Build Project
       run: dotnet build --no-restore --verbosity normal ${{env.PROJECT_PATH}}
+    
+      # Publish artifacts
+    - name: Publish artifacts
+      run: dotnet publish --configuration Release --output ./publish
+
+        
