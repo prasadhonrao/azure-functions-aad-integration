@@ -13,8 +13,8 @@ on:
 
 env:
   DOTNET_VERSION: 6.0.x
-  PROJECT_PATH: ./App
-  SOLUTION_PATH: .
+  PROJECT_PATH: src/App
+  SOLUTION_PATH: src
   AZURE_FUNCTIONAPP_NAME: af-aad-func
   AZURE_RESOURCE_GROUP: af-aad-rg
   AZURE_LOCATION: uksouth
