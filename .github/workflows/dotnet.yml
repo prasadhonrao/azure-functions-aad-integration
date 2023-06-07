@@ -39,4 +39,16 @@ jobs:
     - name: Publish artifacts
       run: dotnet publish --configuration Release --output ./publish
 
+    - name: Set up Azure CLI
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Deploy to Azure Function App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+        slot-name: production
+        resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
+        package: ./publish
         
