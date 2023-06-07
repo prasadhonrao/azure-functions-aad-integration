@@ -3,18 +3,24 @@ name: Deploy to Azure Function App
 on:
   push:
     branches: [ "main" ]
+    path-ignore:
+      - "**.md"
+      - "**.yml"
+      - ".github/**"
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
 
 env:
   DOTNET_VERSION: 6.0.x
-  PROJECT_PATH: App/App.csproj
+  PROJECT_PATH: ./App
+  SOLUTION_PATH: .
   AZURE_FUNCTIONAPP_NAME: af-aad-func
   AZURE_RESOURCE_GROUP: af-aad-rg
   AZURE_LOCATION: uksouth
 
 jobs:
-  BuildLinux:
+  BuildOnLinux:
     runs-on: ubuntu-latest
     steps:
       # Checkout the repo
@@ -29,26 +35,25 @@ jobs:
       
       # Install dependencies
     - name: Restore dependencies
-      run: dotnet restore ${{env.PROJECT_PATH}}
+      run: dotnet restore
+      working-directory: ${{env.SOLUTION_PATH}}
     
       # Build
     - name: Build Project
-      run: dotnet build --no-restore --verbosity normal ${{env.PROJECT_PATH}}
+      run: dotnet build --no-restore --verbosity normal 
+      working-directory: ${{env.SOLUTION_PATH}}
     
       # Publish artifacts
     - name: Publish artifacts
-      run: dotnet publish --configuration Release --output ./publish
+      run: dotnet publish --configuration Release --output ./output
+      working-directory: ${{env.PROJECT_PATH}}
 
-    - name: Set up Azure CLI
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-    - name: Deploy to Azure Function App
-      uses: azure/webapps-deploy@v2
+    - name: 'Run Azure Functions Action'
+      uses: Azure/functions-action@v1
+      id: fa
       with:
         app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
-        slot-name: production
-        resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
-        package: ./publish
+        package: '${{ env.PROJECT_PATH }}/output'
+        publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }} 
+  
         
