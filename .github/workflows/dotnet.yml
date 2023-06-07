@@ -9,18 +9,21 @@ on:
   pull_request:
     branches: [ "main" ]
 
+env:
+  DOTNET_VERSION: 6.0.x
+  PROJECT_PATH: App/App.csproj
+
 jobs:
-  build:
-
+  BuildLinux:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout Code
+      uses: actions/checkout@v3
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: ${{ env.DOTNET_VERSION }}
     - name: Restore dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore
+      run: dotnet restore ${{env.PROJECT_PATH}}
+    - name: Build Project
+      run: dotnet build --no-restore --verbosity normal ${{env.PROJECT_PATH}}
